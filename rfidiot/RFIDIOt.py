@@ -40,6 +40,7 @@ import random
 import time
 # import signal
 # import socket
+import string
 from typing import Tuple # Union
 from operator import xor
 from Crypto.Hash import SHA
@@ -1673,7 +1674,7 @@ class rfidiot:
     def iso_7816_select_file(self, file, control, options) -> bool:
         "7816 select file"
         ins = "SELECT_FILE"
-        lc = "%02x" % (len(file) / 2)
+        lc = "%02x" % (int) (len(file) / 2)
         p1 = control
         p2 = options
         data = file
@@ -2558,20 +2559,15 @@ class rfidiot:
         print(self.ToHex(data))
 
     @staticmethod
+    def _ReadablePrint(text) -> str:
+        return ''.join([i if i in string.printable else "." for i in text])
+
+    # https://stackoverflow.com/questions/8689795/how-can-i-remove-non-ascii-characters-but-leave-periods-and-spaces ??
+    @staticmethod
     def ReadablePrint(data) -> str:
-        out = ""
-        for dat in data:
-            if dat >= " " and dat <= "~":
-                out += dat
-            else:
-                out += "."
-        return out
-        # for x in range(len(data)):
-        #     if data[x] >= " " and data[x] <= "~":
-        #         out += data[x]
-        #     else:
-        #         out += "."
-        # return out
+        if isinstance(data, bytes):
+            data = data.decode('latin-1')  # Special case
+        return ''.join([i if i >= " " and i <= "~"  else "." for i in data])
 
     @staticmethod
     def ListToHex(data) -> str:
@@ -2624,7 +2620,6 @@ class rfidiot:
     def ToBinary(string) -> str:
         "convert hex string to binary characters"
         return bytearray.fromhex(string)
-        # output = ""
         # x = 0
         # while x < len(string):
         #     output += chr(int(string[x : x + 2], 16))
@@ -2715,7 +2710,7 @@ class rfidiot:
                 left += "%02x" % v
                 right += "%02x" % current[x]
             machex = "%016x" % xor(int(left, 16), int(right, 16))
-            mac = tdes.encrypt(self.ToBinary(machex))
+            mac = tdes.encrypt(bytearray.fromhex(machex))
         # iso 9797-1 says we should do the next two steps for "Output Transform 3"
         # but they're obviously redundant for DES3 with only one key, so I don't bother!
         # mac= tdes.decrypt(mac)
