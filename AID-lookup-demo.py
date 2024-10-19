@@ -4,36 +4,84 @@ import csv
 from typing import Tuple, Optional
 # import pprint
 
+_verbose = False
 AID_dat = {}
-def aid_load_dat(filen: Optional[str] = 'AID-data.csv') -> None:
+
+
+# load a csv file into a dict, also separating out the 10 char RID
+def aid_load_dat(aid_filen: Optional[str] = 'AID-data.csv') -> None:
 
     ret_dat = {}
+    rid_filen = 'AID-rim-data.csv'
 
+    i = 0
+    j = 0
     try:
-        with open(filen, newline='', encoding='utf-8') as csvfile:
-            csvfile.readline() # skip header
+        with open(aid_filen, newline='', encoding='utf-8') as csvfile:
+            csvfile.readline()  # skip header
+            spamreader = csv.reader(csvfile, delimiter='\t')
+            # print(header)
+            for row in spamreader:
+                if _verbose > 1:
+                    print([f"{x}:{y}" for x, y in enumerate(row)])
+                if not row or row[0][0] == '#':  # skip empty row and comments
+                    continue
+                i += 1
+                ret_dat[row[0]] = row[1:]
+                rid = row[0][:10]
+                if rid not in ret_dat:
+                    a = [""] * 6
+                    a[0] = row[1] or row[3]  # Vendor or Name
+                    a[1] = row[2] # Country
+                    ret_dat[rid] = a
+                    j += 1
+    except (FileNotFoundError, PermissionError) as _e:
+        # return empty dataset
+        pass
+
+    if _verbose:
+        print(f"loaded: {i}")
+        print(f"rid's:  {i}")
+        print(f"created: {len(ret_dat)}")
+
+    i = 0
+    j = 0
+    try:
+        with open(rid_filen, newline='', encoding='utf-8') as csvfile:
+            csvfile.readline()  # skip header
             spamreader = csv.reader(csvfile, delimiter='\t')
             # print(header)
             for row in spamreader:
                 # print([f"{x}:{type(y)}" for x, y in enumerate(row)])
-                if not row or row[0][0] == '#':  #  skip empty row and comments
+                # print(row)
+                if not row or row[0][0] == '#':  # skip empty row and comments
                     continue
-                ret_dat[row[0]] = row[1:]
-                sub_AID = row[0][:10]
-                if sub_AID not in ret_dat:
+                rid = row[0]
+                if rid not in ret_dat:
                     a = [""] * 6
                     a[0] = row[1]
                     a[1] = row[2]
-                    ret_dat[sub_AID] = a
+                    ret_dat[rid] = a
+                    i += 1
+                else:
+                    if _verbose > 1:
+                        print(row)
+                        print(rid, ret_dat[rid])
+                    j += 1
     except (FileNotFoundError, PermissionError) as _e:
         # return empty dataset
         pass
+
+    if _verbose:
+        print(f"loaded: {i}")
+        print(f"skip: {j}")
+        print(f"total: {len(ret_dat)}")
 
     return ret_dat
 
 
 # lookup AID in AID_dat,
-# if not found look up substring / registered application provider identifier (RID) 
+# if not found look up substring / registered application provider identifier (RID)
 def aid_lookup(aid: str = None) -> Tuple[str, str]:
 
     # if there's nothing to report
@@ -51,9 +99,9 @@ def aid_lookup(aid: str = None) -> Tuple[str, str]:
     if dat:
         # print([f"{x}:{y}" for x, y in enumerate(dat)])
         if dat[0]:
-            aid_info = f"= {dat[0]} {dat[2]}"
+            aid_info = f"{dat[0]} {dat[2]}"
         else:
-            aid_info = f"= {dat[2] or dat[1]} {dat[4]}"
+            aid_info = f"{dat[2] or dat[1]} {dat[4]}"
         return aid, aid_info
 
     return "", ""
@@ -70,7 +118,7 @@ test_AIDs = [
     "A000000337101001", "A00000033710100144", "A0000000036000",
     "A00000000201", "A00000000401", "A00000000410101213", "A00000000410101215", "A0000000041010BB5449435301",
     "A0000000041010C0000301", "A0000000041010C0000302", "A0000000041010", "A0000000042010", "A0000000042203",
-    "A0000000043010", "A000000157002F", "A0000001570021", "A0000001570022", "A0000001570023",
+    "A0000000043010", "A000000157002NOEXIST", "A0000001570021", "A0000001570022", "A0000001570023",
     "A0000001570030", "A0000001570031", "A0000001570040", "A0000001570050", "A0000001570051",
     "A0000001570100", "A0000001570104", "A0000001570109", "A000000157010A", "A000000157010B",
     "A000000157010C", "A000000157010D", "A0000001574443", "A0000001523010", "A0000001524010",
@@ -92,4 +140,4 @@ if __name__ == '__main__':
         if not aid_found:
             print(f"{t_aid}: Not Found / Unknown")
 
-        print(f"{t_aid}:\n\t{aid_found}: {aid_description}")
+        print(f"{t_aid}:\n\t{aid_found + ':':22s} {aid_description}")
