@@ -90,7 +90,7 @@ class rfidiot:
         self.readersubtype = reader
         readernum = int(readernum)
         self.DEBUG = debug
-        self.NoInit = noinit
+        self.NoInit = True # noinit
         self.NFCReader = nfcreader
         self.timeout = to
         if not self.NoInit:
@@ -589,11 +589,12 @@ class rfidiot:
         "PN00": "PN53x Communications Error",
         "R": "Block out of range",
     }
-    DES_IV = "\0\0\0\0\0\0\0\0"
-    DES_PAD = [chr(0x80), chr(0), chr(0), chr(0), chr(0), chr(0), chr(0), chr(0)]
+    DES_IV = b"\0\0\0\0\0\0\0\0"
+    # DES_PAD = [chr(0x80), chr(0), chr(0), chr(0), chr(0), chr(0), chr(0), chr(0)]
+    DES_PAD = b'\x80\x00\x00\x00\x00\x00\x00\x00'
     DES_PAD_HEX = "8000000000000000"
-    KENC = "\0\0\0\1"
-    KMAC = "\0\0\0\2"
+    KENC = b"\0\0\0\1"
+    KMAC = b"\0\0\0\2"
     DO87 = "870901"
     DO8E = "8E08"
     DO97 = "9701"
@@ -924,7 +925,22 @@ class rfidiot:
                 print("Android Reader")
             print()
 
-    def get_error_str(self, err=None) -> str:
+    @staticmethod
+    def get_error_str(err=None) -> str:
+
+        # if err is None:
+        #    err = self.errorcode
+
+        if err in rfidiot.ISO7816ErrorCodes:
+            return rfidiot.ISO7816ErrorCodes[err]
+
+        if err in pynfc.NFC_LIB_ERROR_CODES:
+            return pynfc.NFC_LIB_ERROR_CODES[err]
+
+        # Punt
+        return "gemeral error"
+
+    def _get_error_str(self, err=None) -> str:
 
         if err is None:
             err = self.errorcode
@@ -2095,21 +2111,24 @@ class rfidiot:
     #
     # data manipulation
     #
-    def GetRandom(self, size):
+    @staticmethod
+    def GetRandom(size):
         data = ""
         for x in range(size):
             data += "%02x" % int(random.uniform(0, 0xFF))
         return data
 
-    def Parity(self, data, parity) -> int:
+    @staticmethod
+    def Parity(data, parity) -> int:
         # return parity bit to make odd or even as required
         myparity = 0
         for x in range(len(data)):
             myparity += int(data[x], 2)
         myparity %= 2
         return xor(myparity, parity)
-
-    def Unique64Bit(self, data) -> str:
+ 
+    @staticmethod
+    def Unique64Bit(data) -> str:
         "convert binary ID to Unique formatted 64 bit data block"
         # standard header == 9 bits of '1'
         out = "111111111"
@@ -2150,7 +2169,8 @@ class rfidiot:
         crcvalue = 0x0000
         return self.crc(crcvalue, data, MASK_CCITT)
 
-    def crc(self, crc, data, mask=MASK_CRC16) -> int:
+    @staticmethod
+    def crc(crc, data, mask=MASK_CRC16) -> int:
         for char in data:
             c = ord(char)
             c = c << 8
@@ -2471,7 +2491,8 @@ class rfidiot:
         self.MRPoptionalcd = data[42]
         self.MRPcompsoitecd = data[43]
 
-    def BitReverse(self, data) -> str:
+    @staticmethod
+    def BitReverse(data) -> str:
         "Reverse bits - MSB to LSB"
         output = ""
         for y in range(len(data)):
@@ -2481,7 +2502,8 @@ class rfidiot:
             output += str(chr(int(outchr, 2)))
         return output
 
-    def HexReverse(self, data) -> str:
+    @staticmethod
+    def HexReverse(data) -> str:
         "Reverse HEX characters"
         return data[::-1]
         # output = ""
@@ -2493,7 +2515,8 @@ class rfidiot:
         "Convert HEX to Binary then bit reverse and convert back"
         return self.ToHex(self.BitReverse(self.ToBinary(data)))
 
-    def HexByteReverse(self, data) -> str:
+    @staticmethod
+    def HexByteReverse(data) -> str:
         "Reverse order of Hex pairs"
         output = ""
         y = len(data) - 2
@@ -2502,7 +2525,8 @@ class rfidiot:
             y -= 2
         return output
 
-    def NibbleReverse(self, data) -> str:
+    @staticmethod
+    def NibbleReverse(data) -> str:
         "Reverse Nibbles"
         output = ""
         for d in data:
@@ -2519,7 +2543,8 @@ class rfidiot:
         "Convert HEX to Binary then reverse nibbles and convert back"
         return self.ToHex(self.NibbleReverse(self.ToBinary(data)))
 
-    def ToHex(self, data) -> str:
+    @staticmethod
+    def ToHex(data) -> str:
         "convert binary data to hex printable"
         if isinstance(data, str):
             data = bytes(data.encode())
@@ -2532,7 +2557,8 @@ class rfidiot:
     def HexPrint(self, data) -> None:
         print(self.ToHex(data))
 
-    def ReadablePrint(self, data) -> str:
+    @staticmethod
+    def ReadablePrint(data) -> str:
         out = ""
         for dat in data:
             if dat >= " " and dat <= "~":
@@ -2547,14 +2573,16 @@ class rfidiot:
         #         out += "."
         # return out
 
-    def ListToHex(self, data) -> str:
+    @staticmethod
+    def ListToHex(data) -> str:
         return ''.join(f"{x:02X}" for x in data)
         # string = ""
         # for d in data:
         #     string += "%02X" % d
         # return string
 
-    def HexArrayToString(self, array) -> str:
+    @staticmethod
+    def HexArrayToString(array) -> str:
         # translate array of strings to single string
         return ''.join(array)
         # out = ""
@@ -2581,7 +2609,8 @@ class rfidiot:
             out.append(int(n, 16))
         return out
 
-    def HexToList(self, string) -> list:
+    @staticmethod
+    def HexToList(string) -> list:
         return list(bytearray.fromhex(string))
         # translate string of 2 char HEX to int list
         # n = 0
@@ -2591,9 +2620,10 @@ class rfidiot:
         #     n += 2
         # return out
 
-    def ToBinary(self, string) -> str:
+    @staticmethod
+    def ToBinary(string) -> str:
         "convert hex string to binary characters"
-        return bytearray.fromhex(string).decode()
+        return bytearray.fromhex(string)
         # output = ""
         # x = 0
         # while x < len(string):
@@ -2605,7 +2635,8 @@ class rfidiot:
         "print binary representation"
         print(self.ToBinaryString(data))
 
-    def ToBinaryString(self, data) -> str:
+    @staticmethod
+    def ToBinaryString(data) -> str:
         "convert binary data to printable binary ('01101011')"
         output = ""
         for b in bytearray(data,  encoding='utf8'):
@@ -2619,7 +2650,8 @@ class rfidiot:
         #         output += "%s" % (int(string[x : x + 2], 16) >> y & 1)
         # return output
 
-    def BinaryToManchester(self, data) -> str:
+    @staticmethod
+    def BinaryToManchester(data) -> str:
         "convert binary string to manchester encoded string"
         output = ""
         for bit in data:
@@ -2629,46 +2661,59 @@ class rfidiot:
                 output += "10"
         return output
 
-    def DESParity(self, data) -> str:
-        adjusted = ""
+    @staticmethod
+    def DESParity(data) -> str:
+        adjusted = []
         for x in range(len(data)):
-            y = ord(data[x]) & 0xFE
+            # y = ord(data[x]) & 0xFE
+            y = data[x] & 0xFE
             parity = 0
             for z in range(8):
                 parity += y >> z & 1
-            adjusted += chr(y + (not parity % 2))
-        return adjusted
+            # x = y + (not parity % 2)
+            # print(x)
+            # adjusted += y + (not parity % 2)) & 0xFF
+            adjusted.append(y + (not parity % 2))
+            # print(bytes(adjusted).hex())
+            # adjusted += chr(y + (not parity % 2))
+        return bytes(adjusted)
 
-    def DESKey(self, seed, d_type, length) -> str:
+    def DESKey(self, seed, d_type, length) -> bytes:
         d = seed + d_type
         kencsha = SHA.new(d)
         k = kencsha.digest()
         kp = self.DESParity(k)
         return kp[:length]
 
-    def PADBlock(self, block) -> int:
+    def PADBlock(self, block) -> bytearray:
         "add DES padding to data block"
+        if isinstance(block, str):
+            block = bytearray(block, encoding='utf-8')
         # call with null string to return an 8 byte padding block
         # call with an unknown sized block to return the block padded to a multiple of 8 bytes
+        # print('blk', bytes(block, encoding='utf-8'))
         for x in range(8 - (len(block) % 8)):
-            block += self.DES_PAD[x]
-        return block
+            block.append(self.DES_PAD[x])
+        return block # bytes(block, encoding='utf-8')
 
-    def DES3MAC(self, message, key, ssc):
+    def DES3MAC(self, message, key, ssc) -> bytes:
         "iso 9797-1 Algorithm 3 (Full DES3)"
-        tdes = DES3.new(key, DES3.MODE_ECB, self.DES_IV)
+        # https://pycryptodome.readthedocs.io/en/latest/src/cipher/des3.html
+        # "implementation does not support and will purposefully fail
+        # when attempting to configure the cipher in Option 3."
+        tdes = DES3.new(key, DES3.MODE_ECB)  # , self.DES_IV)
         if ssc:
             mac = tdes.encrypt(self.ToBinary(ssc))
         else:
             mac = self.DES_IV
         message += self.PADBlock("")
-        for y in range(len(message) / 8):
+        for y in range(len(message) // 8):
             current = message[y * 8 : (y * 8) + 8]
             left = ""
             right = ""
             for x, v in enumerate(mac):
-                left += "%02x" % ord(v)
-                right += "%02x" % ord(current[x])
+                left += "%02x" % v
+                right += "%02x" % current[x]
             machex = "%016x" % xor(int(left, 16), int(right, 16))
             mac = tdes.encrypt(self.ToBinary(machex))
         # iso 9797-1 says we should do the next two steps for "Output Transform 3"
@@ -2688,15 +2733,15 @@ class rfidiot:
         else:
             mac = self.DES_IV
         message += self.PADBlock("")
-        for y in range(len(message) / 8):
+        for y in range(len(message) // 8):
             current = message[y * 8 : (y * 8) + 8]
             left = right = ""
             # for x in range(len(mac)):
             for x, v in enumerate(mac):
-                left += "%02x" % ord(v)
-                right += "%02x" % ord(current[x])
+                left += "%02x" % v
+                right += "%02x" % current[x]
             machex = "%016x" % xor(int(left, 16), int(right, 16))
-            mac = tdesa.encrypt(self.ToBinary(machex))
+            mac = tdesa.encrypt(bytearray.fromhex(machex))
         mac = tdesb.decrypt(mac)
         return tdesa.encrypt(mac)
 
@@ -2752,7 +2797,8 @@ class rfidiot:
         else:
             print("Invalid ID!")
 
-    def TRANSITLRC(self, data) -> int:
+    @staticmethod
+    def TRANSITLRC(data) -> int:
         "Calculate TRANSIT LRC"
         i = 0
         lrc = 0x00
@@ -2828,7 +2874,8 @@ class rfidiot:
             out += trailer
         return out
 
-    def FDXBID128BitDecode(self, data) -> str:
+    @staticmethod
+    def FDXBID128BitDecode(data) -> str:
         "convert raw 128 bit FDX-B data to FDX-B ID"
         # strip off header
         y = data[11:]
