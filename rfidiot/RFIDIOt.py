@@ -1673,7 +1673,7 @@ class rfidiot:
     def iso_7816_select_file(self, file, control, options) -> bool:
         "7816 select file"
         ins = "SELECT_FILE"
-        lc = "%02x" % (len(file) / 2)
+        lc = "%02x" % (int) (len(file) / 2)
         p1 = control
         p2 = options
         data = file
@@ -2623,7 +2623,7 @@ class rfidiot:
     @staticmethod
     def ToBinary(string) -> str:
         "convert hex string to binary characters"
-        return bytearray.fromhex(string)
+        return bytearray.fromhex(string).decode('iso-8859-15')
         # output = ""
         # x = 0
         # while x < len(string):
