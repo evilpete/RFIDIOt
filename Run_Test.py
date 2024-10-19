@@ -6,7 +6,7 @@
 #
 #
 
-#pylint: disable= import-outside-toplevel
+#pylint: disable=import-outside-toplevel
 
 import sys
 
@@ -28,6 +28,7 @@ def test_mifarekeys() -> bool:
     print("mifarekeys: Test Fail")
     print(f"\tExpected {expected_result}")
     print(f"\tReceived {results}")
+
     return False
 
 def test_conversion_functions() -> bool:
@@ -35,35 +36,35 @@ def test_conversion_functions() -> bool:
     return_val = True
 
     in_val = ["DE", "AD", "BE", "EF"]
-    out = [222, 173, 190, 239]
+    out_val = [222, 173, 190, 239]
     dat = rfi.HexArrayToList(in_val)
-    if dat != out:
+    if dat != out_val:
         print("HexArrayToList: Test Fail")
-        print(f"\t{dat} != {out}")
+        print(f"\t{dat} != {out_val}")
         return_val = False
 
     in_val = "DEADBEEF"
-    out = [222, 173, 190, 239]
+    out_val = [222, 173, 190, 239]
     dat = rfi.HexToList(in_val)
-    if dat != out:
+    if dat != out_val:
         print("HexToList: Test Fail")
-        print(f"\t{dat} != {out}")
+        print(f"\t{dat} != {out_val}")
         return_val = False
 
     in_val = "DEADBEEF"
-    out = ['DE', 'AD', 'BE', 'EF']
+    out_val = ['DE', 'AD', 'BE', 'EF']
     dat = rfi.HexArraysToArray(in_val)
-    if dat != out:
+    if dat != out_val:
         print("HexArraysToArray: Test Fail")
-        print(f"\t{dat} != {out}")
+        print(f"\t{dat} != {out_val}")
         return_val = False
 
     in_val = "10101010"
-    out = "1001100110011001"
+    out_val = "1001100110011001"
     dat = rfi.BinaryToManchester(in_val)
-    if dat != out:
+    if dat != out_val:
         print("BinaryToManchester: Test Fail")
-        print(f"\t{dat} != {out}")
+        print(f"\t{dat} != {out_val}")
         return_val = False
 
     if return_val:
@@ -85,40 +86,40 @@ def test_crypto_functions() -> bool:
     return_val = True
 
     in_val = b'\xde\xad\xbe\xef'
-    out = "dfadbfef"
+    out_val = "dfadbfef"
     dat = rfi.DESParity(in_val).hex()
-    if dat != out:
+    if dat != out_val:
         print("DESParity: Test Fail")
-        print(f"\t{dat} != {out}")
+        print(f"\t{dat} != {out_val}")
         return_val = False
     else:
         print("DESParity: Test Pass")
 
     in_val = b'\xde\xad\xbe\xef\xde\xad\xbe\xef\xde\xad\xbe\xef\xde\xad\xbe\xef'
-    out = 'ef3489f7b9e6525d5776dafb32ad2c62'
+    out_val = 'ef3489f7b9e6525d5776dafb32ad2c62'
     dat = rfi.DESKey(in_val, rfi.KMAC, 16).hex()
-    if dat != out:
+    if dat != out_val:
         print("DESKey: Test Fail")
-        print(f"\t{dat} != {out}")
+        print(f"\t{dat} != {out_val}")
         return_val = False
     else:
         print("DESKey: Test Pass")
 
-    out = b'\x80\x00\x00\x00\x00\x00\x00\x00'
+    out_val = b'\x80\x00\x00\x00\x00\x00\x00\x00'
     dat = rfi.PADBlock('')
-    if dat != out:
+    if dat != out_val:
         print("PADBlock: Test Fail")
-        print(f"\t{dat} != {out}")
+        print(f"\t{dat} != {out_val}")
         return_val = False
 
     message = b"The quick brown fox jumps over the lazy dog"
     key = b'\xde\xad\xbe\xef\xde\xad\xbe\xef\xde\xad\xbe\xef\xde\xad\xbe\xef'
     ssc = ''
-    out = '9be9c94b596eff37'
+    out_val = '9be9c94b596eff37'
     dat = rfi.DESMAC(message, key, ssc).hex()
-    if dat != out:
+    if dat != out_val:
         print("DESMAC: Test Fail")
-        print(f"\t{dat} != {out}")
+        print(f"\t{dat} != {out_val}")
         return_val = False
     else:
         print("DESMAC: Test Pass")
@@ -126,17 +127,19 @@ def test_crypto_functions() -> bool:
     message = b"The quick brown fox jumps over the lazy dog"
     key = b'\xa1\x10n\x08L=uv&vR\x85\xec\xcbp)\xe6Tu\xd0y\xb3*\x07'
     ssc = ''
-    out = 'c38c8b6ef4653ddf'
+    out_val = 'c38c8b6ef4653ddf'
     dat = rfi.DES3MAC(message, key, ssc).hex()
-    if dat != out:
+    if dat != out_val:
         print("DES3MAC: Test Fail")
-        print(f"\t{dat} != {out}")
+        print(f"\t{dat} != {out_val}")
         return_val = False
     else:
         print("DES3MAC: Test Pass")
 
     if return_val:
         print("Crypto Functions: Test Pass")
+
+    return return_val
 
 def test_get_error_str() -> bool:
 
@@ -168,7 +171,11 @@ def test_rfidiot_lib() -> bool:
 
     test_get_error_str()
 
+    print()
+
     test_conversion_functions()
+
+    print()
 
     test_crypto_functions()
 
@@ -184,7 +191,4 @@ if __name__ == '__main__':
     rfi = rfidiot.card
 
     test_rfidiot_lib()
-
-
-
 

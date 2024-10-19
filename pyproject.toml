@@ -1,13 +1,14 @@
-
+# Pete Shipley peter.shipley@gmail.com
 
 [project]
 name = "rfidiot"  
 requires-python = ">=3.8"
+version = "1.0.1"
 
 
+readme = "README.TXT"
 
 description = "rfidiot is a collection of tools and libraries for exploring RFID technology, written in python."
-
 
 authors = [
     {name = "Adam Laurie", email = "adam@algroup.co.uk" }
@@ -17,17 +18,16 @@ maintainers = [
     {name = "Adam Laurie", email = "adam@algroup.co.uk" }
 ]
 
-
 dependencies = [
     "pycryptodome>=3.20.0"
 ]
 
-[project.optional-dependencies]
-dev = [
+lint = [
+    "validate-pyproject[all]",
     "pylint",
-    "pycodestyle",
-    "black"
+    "pycodestyle,
 ]
+
 
 classifiers = [
     "License :: OSI Approved :: GNU General Public License (GPL)",
@@ -39,16 +39,17 @@ classifiers = [
     "Programming Language :: Python :: 3"
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pylint",
+    "pycodestyle",
+    "black"
+]
+
 [project.urls]
 "Homepage" = "http://rfidiot.org/"
 "Source" = "https://github.com/AdamLaurie/RFIDIOt"
 
-
-lint = [
-    "validate-pyproject[all]",
-    "pylint",
-    "pycodestyle,
-]
 
 [tool.pycodestyle]
 max-line-length = 140
@@ -60,7 +61,7 @@ max-module-lines = 1200
 [tool.pylint]
 max-line-length = 140
 
-tool.pylint.messages_control]
+[tool.pylint.messages_control]
 disable = 
     "invalid-name",
     "missing-docstring",
@@ -76,7 +77,16 @@ disable =
 
 
 # [tool.setuptools]
-# script-files = ["mifarekeys.py", "readtag.py"]
+# script-files = [
+#    "cardselect.py", "ChAP.py", "copytag.py", "demotag.py", "eeprom.py", "fdxbnum.py",
+#    "formatmifare1kvalue.py", "froschtest.py", "hidprox.py", "hitag2brute.py", "hitag2reset.py",
+#    "isotype.py", "jcopmifare.py", "jcopsetatrhist.py", "jcoptool.py", "lfxtype.py",
+#    "loginall.py", "mifarekeys.py", "mrpkey.py", "multiselect.py", "pn532emulate.py",
+#    "pn532mitm.py", "q5reset.py", "readlfx.py", "readmifare1k.py", "readmifaresimple.py",
+#    "readmifareultra.py", "readtag.py", "rfidiot-cli.py", "send_apdu.py", "sod.py",
+#    "transit.py", "unique.py", "writelfx.py", "writemifare1k.py", "testacg.sh",
+#    "testlahf.sh",
+#]
 
 [tool.black]
 line-length = 140
