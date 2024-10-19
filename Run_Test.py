@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
 
+#
+#
+# Primitive testing script, needs to be automated and replaced
+#
+#
+
+#pylint: disable= import-outside-toplevel
+
 import sys
 
 
@@ -21,13 +29,6 @@ def test_mifarekeys() -> bool:
     print(f"\tExpected {expected_result}")
     print(f"\tReceived {results}")
     return False
-
-
-def test_rfidiot_lib() -> bool:
-
-    test_get_error_str()
-
-    test_conversion_functions()
 
 def test_conversion_functions() -> bool:
 
@@ -64,13 +65,13 @@ def test_conversion_functions() -> bool:
         print("BinaryToManchester: Test Fail")
         print(f"\t{dat} != {out}")
         return_val = False
-    
+
     if return_val:
         print("Conversion Functions: Test Pass")
 
     return return_val
 
-def ToHex(data):
+def _ToHex(data):
     "convert binary data to hex printable"
     if isinstance(data, (bytes, bytearray)):
         return data.hex()
@@ -92,7 +93,7 @@ def test_crypto_functions() -> bool:
         return_val = False
     else:
         print("DESParity: Test Pass")
-    
+
     in_val = b'\xde\xad\xbe\xef\xde\xad\xbe\xef\xde\xad\xbe\xef\xde\xad\xbe\xef'
     out = 'ef3489f7b9e6525d5776dafb32ad2c62'
     dat = rfi.DESKey(in_val, rfi.KMAC, 16).hex()
@@ -102,14 +103,14 @@ def test_crypto_functions() -> bool:
         return_val = False
     else:
         print("DESKey: Test Pass")
-    
+
     out = b'\x80\x00\x00\x00\x00\x00\x00\x00'
     dat = rfi.PADBlock('')
     if dat != out:
         print("PADBlock: Test Fail")
         print(f"\t{dat} != {out}")
         return_val = False
-    
+
     message = b"The quick brown fox jumps over the lazy dog"
     key = b'\xde\xad\xbe\xef\xde\xad\xbe\xef\xde\xad\xbe\xef\xde\xad\xbe\xef'
     ssc = ''
@@ -121,33 +122,23 @@ def test_crypto_functions() -> bool:
         return_val = False
     else:
         print("DESMAC: Test Pass")
-    
+
     message = b"The quick brown fox jumps over the lazy dog"
-    #key = b'\xde\xad\xbe\xef\xde\xad\xbe\xef\xde\xad\xbe\xef\xde\xad\xbe\xef'
-    # key = b'\xde\xad\xbe\xef' *6
     key = b'\xa1\x10n\x08L=uv&vR\x85\xec\xcbp)\xe6Tu\xd0y\xb3*\x07'
     ssc = ''
-    out = rfi.DES3MAC(message, key, ssc)
-    print("DES3MAC", ToHex(out))
+    out = 'c38c8b6ef4653ddf'
+    dat = rfi.DES3MAC(message, key, ssc).hex()
+    if dat != out:
+        print("DES3MAC: Test Fail")
+        print(f"\t{dat} != {out}")
+        return_val = False
+    else:
+        print("DES3MAC: Test Pass")
 
     if return_val:
         print("Crypto Functions: Test Pass")
 
 def test_get_error_str() -> bool:
-    # sys.argv.append('-n')
-    # import rfidiot
-    # $ from rfidiot.RFIDIOt import rfidiot as rid
-    # import rfidiot as ri
-    # import rfidiot.rfidiot 
-
-    # rid = rfidiot.RFIDIOt.rfidiot()
-    # print(dir(rfidiot))
-    # print(dir(rfidiot.card))
-    # rfi = rfidiot.card
-    # print(dir(rid))
-
-    # print("3")
-    # rfi = rfidiot()
 
     test_cases = {
         "6200": "No information given",
@@ -173,19 +164,27 @@ def test_get_error_str() -> bool:
 
     return False
 
+def test_rfidiot_lib() -> bool:
+
+    test_get_error_str()
+
+    test_conversion_functions()
+
+    test_crypto_functions()
 
 if __name__ == '__main__':
 
     print("\n---Script Tests---")
     assert test_mifarekeys()
 
+    # make sure this is last because it mucks with argv
     print("\n---Module Library Tests---")
     sys.argv.append('-n')
     import rfidiot
     rfi = rfidiot.card
+
     test_rfidiot_lib()
 
-    test_crypto_functions()
 
 
 

@@ -2715,7 +2715,7 @@ class rfidiot:
                 left += "%02x" % v
                 right += "%02x" % current[x]
             machex = "%016x" % xor(int(left, 16), int(right, 16))
-            mac = tdes.encrypt(self.ToBinary(machex))
+            mac = tdes.encrypt(bytearray.fromhex(machex))
         # iso 9797-1 says we should do the next two steps for "Output Transform 3"
         # but they're obviously redundant for DES3 with only one key, so I don't bother!
         # mac= tdes.decrypt(mac)
