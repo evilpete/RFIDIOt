@@ -90,11 +90,13 @@ def aid_lookup(aid: str = None) -> Tuple[str, str]:
 
     dat = None
     while len(aid) >= 10:
+        # print(len(aid), "trying", aid)  # Debug
         if aid in AID_dat:
             dat = AID_dat[aid]
             break
-        # print(len(aid), "trying", aid)  Debug
         aid = aid[:-1]
+        if len(aid) == 13:
+            aid = aid[:10]
 
     if dat:
         # print([f"{x}:{y}" for x, y in enumerate(dat)])
