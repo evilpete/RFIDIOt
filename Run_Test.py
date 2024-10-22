@@ -72,6 +72,24 @@ def test_conversion_functions() -> bool:
         print(f"\t{dat} != {out_val}")
         return_val = False
 
+    in_val = "\x03Hello\x85\xf1World!\x10"
+    out_val = '.Hello..World!.'
+    dat = rfi.ReadablePrint(in_val)
+    # dat = rfi._ReadablePrint(my_string)
+    if dat != out_val:
+        print("ReadablePrint: str Test Fail")
+        print(f"\t{dat} != {out_val}")
+        return_val = False
+
+    in_val = b"\x03Hello\x85\xf1World!\x10"
+    out_val = '.Hello..World!.'
+    dat = rfi.ReadablePrint(in_val)
+    # dat = rfi._ReadablePrint(my_string)
+    if dat != out_val:
+        print("ReadablePrint: bytes Test Fail")
+        print(f"\t{dat} != {out_val}")
+        return_val = False
+
     if return_val:
         print("Conversion Functions: Test Pass")
 

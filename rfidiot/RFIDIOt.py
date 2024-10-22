@@ -40,6 +40,7 @@ import random
 import time
 # import signal
 # import socket
+import string
 from typing import Tuple # Union
 from operator import xor
 from Crypto.Hash import SHA
@@ -2558,20 +2559,15 @@ class rfidiot:
         print(self.ToHex(data))
 
     @staticmethod
+    def _ReadablePrint(text) -> str:
+        return ''.join([i if i in string.printable else "." for i in text])
+
+    # https://stackoverflow.com/questions/8689795/how-can-i-remove-non-ascii-characters-but-leave-periods-and-spaces ??
+    @staticmethod
     def ReadablePrint(data) -> str:
-        out = ""
-        for dat in data:
-            if dat >= " " and dat <= "~":
-                out += dat
-            else:
-                out += "."
-        return out
-        # for x in range(len(data)):
-        #     if data[x] >= " " and data[x] <= "~":
-        #         out += data[x]
-        #     else:
-        #         out += "."
-        # return out
+        if isinstance(data, bytes):
+            data = data.decode('latin-1')  # Special case
+        return ''.join([i if i >= " " and i <= "~"  else "." for i in data])
 
     @staticmethod
     def ListToHex(data) -> str:
