@@ -196,6 +196,14 @@ def text_aid_lookup() -> bool:
         print("text_aid_lookup: Test Fail")
         return False
 
+# make this a test somehow
+#    i = 0
+#    for x in AID_Lookup.list_aids():
+#        print(x)
+#        i += 1
+#        if i > 20:
+#            break
+
     print("text_aid_lookup: Test Pass")
     return True
 
