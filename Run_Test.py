@@ -12,7 +12,12 @@ import sys
 
 
 def test_mifarekeys() -> bool:
-    from mifarekeys import gen_MifarePWD
+    try:
+        from mifarekeys import gen_MifarePWD
+    except ImportError as _e:
+        print(f'Failed to import file "mifarekeys.py": {_e}')
+        print("mifarekeys: Test SKIPPED")
+        return False
 
     key_A = bytearray.fromhex('A0A1A2A3A4A5')
     key_B = bytearray.fromhex('B0B1B2B3B4B5')
@@ -179,13 +184,32 @@ def test_rfidiot_lib() -> bool:
 
     test_crypto_functions()
 
+def text_aid_lookup() -> bool:
+    try:
+        from AID_lookup import AID_Lookup
+    except ImportError as _e:
+        print(f'Failed to import file "AID_Lookup.py": {_e}')
+        print("AID_Lookup: Test SKIPPED")
+        return False
+
+    if not AID_Lookup().self_test():
+        print("text_aid_lookup: Test Fail")
+        return False
+
+    print("text_aid_lookup: Test Pass")
+    return True
+
 if __name__ == '__main__':
 
     print("\n---Script Tests---")
     assert test_mifarekeys()
 
+
     # make sure this is last because it mucks with argv
     print("\n---Module Library Tests---")
+
+    text_aid_lookup()
+
     sys.argv.append('-n')
     import rfidiot
     rfi = rfidiot.card

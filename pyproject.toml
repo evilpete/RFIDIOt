@@ -43,7 +43,9 @@ classifiers = [
 dev = [
     "pylint",
     "pycodestyle",
-    "black"
+    "black",
+    "BeautifulSoup",
+    "pandas"
 ]
 
 [project.urls]
