@@ -41,4 +41,5 @@ Card data Sector contains the Sector numbers :
 Throwawqay Demo code for AID-lookup:
     AID-lookup-demo.py
     AID-data.csv
+    RID-data.csv
 

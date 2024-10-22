@@ -39,6 +39,11 @@ classifiers = [
     "Programming Language :: Python :: 3"
 ]
 
+
+[project.urls]
+"Homepage" = "http://rfidiot.org/"
+"Source" = "https://github.com/AdamLaurie/RFIDIOt"
+
 [project.optional-dependencies]
 dev = [
     "pylint",
@@ -48,18 +53,13 @@ dev = [
     "pandas"
 ]
 
-[project.urls]
-"Homepage" = "http://rfidiot.org/"
-"Source" = "https://github.com/AdamLaurie/RFIDIOt"
-
-
 [tool.pycodestyle]
 max-line-length = 140
 ignore = "E722,W391,E203"
 
 [tool.pylint]
 max-line-length = 140
-extension-pkg-allow-list = ["numpy", "pandas", "scipy"]
+extension-pkg-allow-list = ["numpy", "pandas", "scipy", "BeautifulSoup"]
 jobs = 0
 
 [tool.pylint.format]
