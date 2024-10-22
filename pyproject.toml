@@ -55,14 +55,17 @@ dev = [
 max-line-length = 140
 ignore = "E722,W391,E203"
 
+[tool.pylint]
+max-line-length = 140
+extension-pkg-allow-list = ["numpy", "pandas", "scipy"]
+jobs = 0
+
 [tool.pylint.format]
 max-module-lines = 1200
 
-[tool.pylint]
-max-line-length = 140
-
 [tool.pylint.messages_control]
 disable =  [
+    "broad-exception-caught",
     "invalid-name",
     "missing-docstring",
     "too-many-arguments",
