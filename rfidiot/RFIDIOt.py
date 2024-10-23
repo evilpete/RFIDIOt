@@ -2183,7 +2183,8 @@ class rfidiot:
                 c = c << 1
         return crc & 0xFFFF
 
-    def crc16(self, data):
+    @staticmethod
+    def crc16(data):
         crcValue = 0x0000
         crc16tab = (
             0x0000,
@@ -2527,28 +2528,40 @@ class rfidiot:
         return output
 
     @staticmethod
-    def NibbleReverse(data) -> str:
-        "Reverse Nibbles"
-        output = ""
-        for d in data:
-            leftnibble = ""
-            rightnibble = ""
-            for x in range(4):
-                leftnibble += str(ord(d) >> x & 1)
-            for x in range(4, 8):
-                rightnibble += str(ord(d) >> x & 1)
-            output += str(chr(int(rightnibble + leftnibble, 2)))
-        return output
+    def NibbleSwap(data: bytes) -> bytearray:
+        "Swap Nibbles in bytes"
+        # if isinstance(data, str):
+        #     data = bytes(data, encoding='latin-1')
+        return bytearray( [(b & 0x0F) << 4 | (b & 0xF0) >> 4 for b in data])
 
-    def HexNibbleReverse(self, data) -> str:
+    @staticmethod
+    def NibbleReverse(data: bytes) -> bytearray:
+        "Reverse Nibbles"
+        if isinstance(data, str):
+             data = bytes(data, encoding='latin-1')
+        return bytearray( [(b & 0x88) >> 3 | (b & 0x44) >> 1 | (b & 0x22) << 1 | (b & 0x11) << 3 for b in data])
+        # output = ""
+        # for d in data:
+        #     leftnibble = ""
+        #     rightnibble = ""
+        #     for x in range(4):
+        #         leftnibble += str(ord(d) >> x & 1)
+        #     for x in range(4, 8):
+        #         rightnibble += str(ord(d) >> x & 1)
+        #     output += str(chr(int(rightnibble + leftnibble, 2)))
+        # return output
+
+    @staticmethod
+    def HexNibbleReverse(data) -> str:
         "Convert HEX to Binary then reverse nibbles and convert back"
-        return self.ToHex(self.NibbleReverse(self.ToBinary(data)))
+        return rfidiot.NibbleReverse(bytes.fromhex(data)).hex()
 
     @staticmethod
     def ToHex(data) -> str:
         "convert binary data to hex printable"
+        # '\x01\x03\x07\x0F\x1F\x3F\x7F\xFF' -> '0103070f1f3f7fff'"
         if isinstance(data, str):
-            data = bytes(data.encode())
+            data = bytes(data, encoding='latin-1')
         return data.hex()
         # string = ""
         # for x in range(len(data)):
@@ -2580,35 +2593,37 @@ class rfidiot:
     @staticmethod
     def HexArrayToString(array) -> str:
         # translate array of strings to single string
+        # ['DE', 'AD', 'BE', 'EF'] => 'DEADBEEF' 
         return ''.join(array)
         # out = ""
         # for n in array:
         #     out += n
         # return out
 
-    def HexArraysToArray(self, array) -> list:
+    @staticmethod
+    def HexArraysToArray(array) -> list:
         # translate an array of strings to an array of 2 character strings
-        temp = self.HexArrayToString(array)
-        out = []
-        n = 0
-        while n < len(temp):
-            out.append(temp[n : n + 2])
-            n += 2
-        return out
+        # "DEADBEEF" => ['DE', 'AD', 'BE', 'EF']
+        temp = rfidiot.HexArrayToString(array)
+        return [temp[i:i+2] for i in range(0, len(temp), 2)]
 
-    def HexArrayToList(self, array) -> list:
+    @staticmethod
+    def HexArrayToList(array) -> list:
         # translate array of 2 char HEX to int list
+        #  ["DE", "AD", "BE", "EF"] => [222, 173, 190, 239]
         # first make sure we're dealing with a single array
-        source = self.HexArraysToArray(array)
-        out = []
-        for n in source:
-            out.append(int(n, 16))
-        return out
+        source = rfidiot.HexArraysToArray(array)
+        return [int(n, 16) for n in source]
+        # out = []
+        # for n in source:
+        #     out.append(int(n, 16))
+        # return out
 
     @staticmethod
     def HexToList(string) -> list:
-        return list(bytearray.fromhex(string))
         # translate string of 2 char HEX to int list
+        # 'DEADBEEF' => [222, 173, 190, 239]
+        return list(bytearray.fromhex(string))
         # n = 0
         # out = []
         # while n < len(string):
@@ -2619,6 +2634,7 @@ class rfidiot:
     @staticmethod
     def ToBinary(string) -> str:
         "convert hex string to binary characters"
+        #   '0103070f1f3f7fff' -> b'\x01\x03\x07\x0F\x1F\x3F\x7F\xFF'
         return bytearray.fromhex(string)
         # x = 0
         # while x < len(string):
@@ -2626,18 +2642,28 @@ class rfidiot:
         #     x += 2
         # return output
 
-    def BinaryPrint(self, data) -> None:
+    # temp save
+    def _BinaryPrint(self, data) -> None:
         "print binary representation"
         print(self.ToBinaryString(data))
 
     @staticmethod
+    def BinaryPrint(data) -> None:
+        "print binary representation"
+        print(rfidiot.ToBinaryString(data))
+
+    @staticmethod
     def ToBinaryString(data) -> str:
         "convert binary data to printable binary ('01101011')"
-        output = ""
-        for b in bytearray(data,  encoding='utf8'):
-            # output += bin(b)[2:].zfill(8) # .removepreffix('0b')
-            output += '{:08b}'.format(b)
-        return output
+        # '\x01\x03\x07' => '000000010000001100000111'
+        if isinstance(data, str):
+            data = bytes(data, encoding='latin-1')
+        return ''.join(f'{b:08b}' for b in data)
+        #output = ""
+        #for b in bytearray(data,  encoding='latin-1'):
+        #    # output += bin(b)[2:].zfill(8) # .removepreffix('0b')
+        #    output += '{:08b}'.format(b)
+        #return output
         # output = ""
         # string = self.ToHex(data)
         # for x in range(0, len(string), 2):
@@ -2648,13 +2674,15 @@ class rfidiot:
     @staticmethod
     def BinaryToManchester(data) -> str:
         "convert binary string to manchester encoded string"
-        output = ""
-        for bit in data:
-            if bit == "0":
-                output += "01"
-            else:
-                output += "10"
-        return output
+        # '10101010' => '1001100110011001'
+        return ''.join("01" if bit == "0" else "10" for bit in data)
+        # output = ""
+        # for bit in data:
+        #     if bit == "0":
+        #         output += "01"
+        #     else:
+        #         output += "10"
+        # return output
 
     @staticmethod
     def DESParity(data) -> str:
@@ -2683,7 +2711,7 @@ class rfidiot:
     def PADBlock(self, block) -> bytearray:
         "add DES padding to data block"
         if isinstance(block, str):
-            block = bytearray(block, encoding='utf-8')
+            block = bytearray(block, encoding='latin-1')
         # call with null string to return an 8 byte padding block
         # call with an unknown sized block to return the block padded to a multiple of 8 bytes
         # print('blk', bytes(block, encoding='utf-8'))

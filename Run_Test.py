@@ -90,6 +90,84 @@ def test_conversion_functions() -> bool:
         print(f"\t{dat} != {out_val}")
         return_val = False
 
+
+    in_val = b'\x01\x03\x07\x0F\x1F\x3F\x7F\xFF'
+    out_val = '0000000100000011000001110000111100011111001111110111111111111111'
+    dat = rfi.ToBinaryString(in_val)
+    if dat != out_val:
+        print("ToBinaryString: bytes Test Fail")
+        print(f"\t{dat} != {out_val}")
+        return_val = False
+
+    in_val = "\x01\x03\x07\x0F\x1F\x3F\x7F\xFF"
+    dat = rfi.ToBinaryString(in_val)
+    if dat != out_val:
+        print("ToBinaryString: str Test Fail")
+        print(f"\t{dat} != {out_val}")
+        return_val = False
+
+    in_val = b'\x01\x03\x07\x0F\x1F\x3F\x7F\xFF'
+    out_val = '0103070f1f3f7fff'
+    dat = rfi.ToHex(in_val)
+    if dat != out_val:
+        print("ToHex: bytes Test Fail")
+        print(f"\t{dat} != {out_val}")
+        return_val = False
+
+    in_val = "\x01\x03\x07\x0F\x1F\x3F\x7F\xFF"
+    dat = rfi.ToHex(in_val)
+    if dat != out_val:
+        print("ToHex: str Test Fail")
+        print(f"\t{dat} != {out_val}")
+        return_val = False
+
+    in_val = '0103070f1f3f7fff'
+    out_val = b'\x01\x03\x07\x0F\x1F\x3F\x7F\xFF'
+    dat = rfi.ToBinary(in_val)
+    if dat != out_val:
+        print("ToBinary: Test Fail")
+        print(f"\t{dat} != {out_val}")
+        return_val = False
+
+    in_val = bytes([0x12, 0x34, 0x56, 0x78])
+    out_val = bytes([0x84, 0xc2, 0xa6, 0xe1])
+    # 84c2a6e1
+    dat = rfi.NibbleReverse(in_val)
+    if dat != out_val:
+        print("NibbleReverse: byte Test Fail")
+        print(f"\t{dat.hex()} != {out_val.hex()}")
+        return_val = False
+
+    in_val = '\x124Vx'
+    out_val = bytes([0x84, 0xc2, 0xa6, 0xe1])
+    # 84c2a6e1
+    dat = rfi.NibbleReverse(in_val)
+    if dat != out_val:
+        print("NibbleReverse: str Test Fail")
+        print(f"\t{dat.hex()} != {out_val.hex()}")
+        return_val = False
+
+    # in_val = '112233aabbccddff'
+    # out_val = '8844cc55dd33bbff'
+    in_val = '12345678'
+    out_val = '84c2a6e1'
+    dat = rfi.HexNibbleReverse(in_val)
+    if dat != out_val:
+        print("_HexNibbleReverse: Test Fail")
+        print(f"\t{dat} != {out_val}")
+        return_val = False
+
+    in_val = '112233aabbccddff'
+    out_val = '8844cc55dd33bbff'
+    dat = rfi.HexNibbleReverse(in_val)
+    if dat != out_val:
+        print("HexNibbleReverse: Test Fail")
+        print(f"\t{dat} != {out_val}")
+        return_val = False
+
+# ('HexNibbleReverse:', '8844cc55dd33bbff')
+# 112233AABBCCDDFF
+
     if return_val:
         print("Conversion Functions: Test Pass")
 
